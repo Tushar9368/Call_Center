@@ -23,7 +23,6 @@ function fetchData() {
     })
     .catch(error => console.error('Error fetching data:', error));
 }
-
 // Populate unique states in the state dropdown
 function populateStates(data) {
   const states = [...new Set(data.map(record => record.StateName).filter(Boolean))].sort();
@@ -84,7 +83,7 @@ function displayResults(state, city) {
       <p>Answer: ${record.KccAns}</p>
       <p>State: ${record.StateName}</p>
       <p>Location: ${record.DistrictName}</p>
-      <p>Date: ${record.CreatedOn}</p>
+    
     `;
     resultsContainer.appendChild(resultItem);
   });
