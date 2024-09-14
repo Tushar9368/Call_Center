@@ -1,109 +1,115 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const yearSelect = document.getElementById('year');
+  const monthSelect = document.getElementById('month');
+  const stateSelect = document.getElementById('state');
+  const districtSelect = document.getElementById('district');
+  const filterBtn = document.getElementById('filterBtn');
+  const qaContainer = document.getElementById('qaContainer');
 
-const apiKey = '579b464db66ec23bdd000001a7a37c6753d241d158cfea482002a5b4';
-const apiUrl = `https://api.data.gov.in/resource/cef25fe2-9231-4128-8aec-2c948fedd43f?api-key=${apiKey}&format=json&limit=10742`;
+  const apiUrl = 'https://api.data.gov.in/resource/cef25fe2-9231-4128-8aec-2c948fedd43f';
+  const apiKey = '579b464db66ec23bdd000001a7a37c6753d241d158cfea482002a5b4';
 
-const stateSelect = document.getElementById('state');
-const citySelect = document.getElementById('city');
-const fetchDataButton = document.getElementById('fetchData');
-const resultsContainer = document.getElementById('results');
-
-let records = [];
-
-// Fetch data from API
-function fetchData() {
-  fetch(apiUrl)
-    .then(response => response.json())
-    .then(data => {
-      if (data.records && data.records.length > 0) {
-        records = data.records;
-        populateStates(records);
-      } else {
-        console.error('No records found in API response');
-      }
-    })
-    .catch(error => console.error('Error fetching data:', error));
-}
-// Populate unique states in the state dropdown
-function populateStates(data) {
-  const states = [...new Set(data.map(record => record.StateName).filter(Boolean))].sort();
-
-  if (states.length === 0) {
-    console.error('No valid states found');
-    return;
+  function populateYears() {
+    const currentYear = new Date().getFullYear();
+    for (let year = 2008; year <= currentYear; year++) {
+      const option = document.createElement('option');
+      option.value = year;
+      option.textContent = year;
+      yearSelect.appendChild(option);
+    }
   }
 
-  stateSelect.innerHTML = `<option value="">Select a state</option>`;
-  states.forEach(state => {
-    const option = document.createElement('option');
-    option.value = state;
-    option.textContent = state;
-    stateSelect.appendChild(option);
+  function populateMonths() {
+    for (let month = 1; month <= 12; month++) {
+      const option = document.createElement('option');
+      option.value = month;
+      option.textContent = month;
+      monthSelect.appendChild(option);
+    }
+  }
+
+  function populateStates(data) {
+    const states = [...new Set(data.map(record => record.StateName).filter(Boolean))].sort();
+    stateSelect.innerHTML = `<option value="">Select a state</option>`;
+    states.forEach(state => {
+      const option = document.createElement('option');
+      option.value = state;
+      option.textContent = state;
+      stateSelect.appendChild(option);
+    });
+  }
+
+  function populateDistricts(data, selectedState) {
+    const districts = [...new Set(data.filter(record => record.StateName === selectedState).map(record => record.DistrictName))].sort();
+    districtSelect.innerHTML = `<option value="">Select a district</option>`;
+    districts.forEach(district => {
+      const option = document.createElement('option');
+      option.value = district;
+      option.textContent = district;
+      districtSelect.appendChild(option);
+    });
+  }
+
+  async function fetchData(filters = {}) {
+    const queryParams = new URLSearchParams({
+      'api-key': apiKey,
+      'format': 'json',
+      'limit': 10000,
+      ...filters
+    });
+
+    const response = await fetch(`${apiUrl}?${queryParams.toString()}`);
+    const data = await response.json();
+    return data.records;
+  }
+
+  function displayQA(data) {
+    qaContainer.innerHTML = '';
+    data.forEach(record => {
+      const question = document.createElement('p');
+      const answer = document.createElement('p');
+      question.className = 'question';
+      answer.className = 'answer';
+      question.textContent = `Question: ${record.QueryText || 'No Question'}`;
+      answer.textContent = `Answer: ${record.KccAns || 'No Answer'}`;
+
+      qaContainer.appendChild(question);
+      qaContainer.appendChild(answer);
+    });
+  }
+
+  async function onFilter() {
+    const year = yearSelect.value;
+    const month = monthSelect.value;
+    const state = stateSelect.value;
+    const district = districtSelect.value;
+
+    const filters = {
+      ...(year && { 'filters[year]': year }),
+      ...(month && { 'filters[month]': month }),
+      ...(state && { 'filters[StateName]': state }),
+      ...(district && { 'filters[DistrictName]': district }),
+    };
+
+    const data = await fetchData(filters);
+    displayQA(data);
+  }
+
+  filterBtn.addEventListener('click', onFilter);
+
+  yearSelect.addEventListener('change', async () => {
+    const year = yearSelect.value;
+    const data = await fetchData({ 'filters[year]': year });
+    populateStates(data);
   });
-}
 
-// Populate unique cities based on selected state
-function populateCities(selectedState) {
-  const cities = [...new Set(records
-    .filter(record => record.StateName === selectedState && record.DistrictName)
-    .map(record => record.DistrictName))].sort();
-
-  if (cities.length === 0) {
-    citySelect.innerHTML = '<option value="">No cities available</option>';
-    return;
-  }
-
-  citySelect.innerHTML = `<option value="">Select a city</option>`;
-  cities.forEach(city => {
-    const option = document.createElement('option');
-    option.value = city;
-    option.textContent = city;
-    citySelect.appendChild(option);
+  stateSelect.addEventListener('change', async () => {
+    const year = yearSelect.value;
+    const state = stateSelect.value;
+    const data = await fetchData({ 'filters[year]': year });
+    populateDistricts(data, state);
   });
-}
 
-// Filter and display the questions and answers based on state and city
-function displayResults(state, city) {
-  const filteredData = records.filter(record =>
-    (state ? record.StateName === state : true) &&
-    (city ? record.DistrictName === city : true)
-  );
-
-  resultsContainer.innerHTML = '';
-
-  if (filteredData.length === 0) {
-    resultsContainer.innerHTML = '<p>No results found.</p>';
-    return;
-  }
-
-  filteredData.forEach(record => {
-    const resultItem = document.createElement('div');
-    resultItem.classList.add('result-item');
-    resultItem.innerHTML = `
-      <h3>Question: ${record.QueryText}</h3>
-      <p>Answer: ${record.KccAns}</p>
-      <p>State: ${record.StateName}</p>
-      <p>Location: ${record.DistrictName}</p>
-    
-    `;
-    resultsContainer.appendChild(resultItem);
-  });
-}
-
-// Event listeners
-stateSelect.addEventListener('change', (e) => {
-  const selectedState = e.target.value;
-  if (selectedState) {
-    populateCities(selectedState);
-  } else {
-    citySelect.innerHTML = '<option value="">Select a city</option>';
-  }
+  populateYears();
+  populateMonths();
 });
-
-fetchDataButton.addEventListener('click', () => {
-  const selectedState = stateSelect.value;
-  const selectedCity = citySelect.value;
-  displayResults(selectedState, selectedCity);
-});
-
-// Fetch initial data and populate states on page load
-window.onload = fetchData;
