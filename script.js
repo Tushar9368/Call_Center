@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const queryParams = new URLSearchParams({
       'api-key': apiKey,
       'format': 'json',
-      'limit': 5000,
+      'limit': 1000,
       ...filters
     });
 
