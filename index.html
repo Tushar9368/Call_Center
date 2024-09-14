@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kisan Call Centre Q&A</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Kisan Call Centre Q&A</h1>
+  <div class="filter-section">
+    <label for="state">State:</label>
+    <select id="state">
+      <option value="">Select a state</option>
+    </select>
+    
+    <label for="city">City/Location:</label>
+    <select id="city">
+      <option value="">Select a city</option>
+    </select>
+    
+    <button id="fetchData">Fetch Q&A</button>
+  </div>
+
+  <div class="result-section">
+    <h2>Results</h2>
+    <div id="results"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
