@@ -7,24 +7,67 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Kisan Call Centre Q&A</h1>
-  <div class="filter-section">
-    <label for="state">State:</label>
-    <select id="state">
-      <option value="">Select a state</option>
-    </select>
-    
-    <label for="city">City/Location:</label>
-    <select id="city">
-      <option value="">Select a city</option>
-    </select>
-    
-    <button id="fetchData">Fetch Q&A</button>
-  </div>
 
-  <div class="result-section">
-    <h2>Results</h2>
-    <div id="results"></div>
+<div id="google_translate_element"></div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,hi,ta,te,kn,ml,mr,bn,gu,pa,or,as,ur',
+        layout: google.translate.TranslateElement
+    }, 'google_translate_element');
+}
+
+window.addEventListener('load', function() {
+    periodicallyHideToolbar();
+});
+</script>
+
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <div class="container">
+      <h1>Kisan Call Centre</h1>
+    <h1>Questions and Answers</h1>
+    <div class="form-group">
+      <label for="year">Year:</label>
+      <select id="year" name="year">
+        <option value="">Select a year</option>
+        <!-- Options will be populated dynamically -->
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="month">Month:</label>
+      <select id="month" name="month">
+        <option value="">Select a month</option>
+        <!-- Options will be populated dynamically -->
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="state">State:</label>
+      <select id="state" name="state">
+        <option value="">Select a state</option>
+        <!-- Options will be populated dynamically -->
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="district">District:</label>
+      <select id="district" name="district">
+        <option value="">Select a district</option>
+        <!-- Options will be populated dynamically -->
+      </select>
+    </div>
+
+    <button id="filterBtn">Get</button>
+
+    <div class="results">
+      <div id="qaContainer">
+        <!-- Data will be populated dynamically -->
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
